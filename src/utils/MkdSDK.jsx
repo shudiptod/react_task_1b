@@ -10,7 +10,24 @@ export default function MkdSDK() {
   let base64Encode = btoa(raw);
 
   this.login = async function (email, password, role) {
-    //TODO
+
+    const loginResponse = await fetch('https://reacttask.mkdlabs.com/v2/api/lambda/login', {
+      "method": 'POST',
+      "headers": {
+        "Content-Type": "application/json",
+        "X-project": "cmVhY3R0YXNrOjVmY2h4bjVtOGhibzZqY3hpcTN4ZGRvZm9kb2Fjc2t5ZQ=="
+      },
+      "body": JSON.stringify(
+        {
+          "email": email,
+          "password": password,
+          "role": role
+        }
+      ),
+      "redirect": "follow"
+    });
+    return loginResponse.json();
+
   };
 
   this.getHeader = function () {
@@ -24,8 +41,22 @@ export default function MkdSDK() {
     return this._baseurl;
   };
 
-  this.check = async function (role) {
-    //TODO
+  this.check = async function (role, token) {
+
+    const checkResponse = await fetch('https://reacttask.mkdlabs.com/v2/api/lambda/check', {
+      "method": 'POST',
+      "headers": {
+        "Content-Type": "application/json",
+        "x-project": "cmVhY3R0YXNrOjVmY2h4bjVtOGhibzZqY3hpcTN4ZGRvZm9kb2Fjc2t5ZQ==",
+        "Authorization": `Bearer ${token}`
+      },
+      "body": JSON.stringify(
+        {
+          role: role
+        }
+      )
+    });
+    return checkResponse.json();
   };
 
   return this;

@@ -5,7 +5,8 @@ import * as yup from "yup";
 import MkdSDK from "../utils/MkdSDK";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../authContext";
-
+import SnackBar from "../components/SnackBar";
+import { GlobalContext } from "../globalContext";
 const AdminLoginPage = () => {
   const schema = yup
     .object({
@@ -14,7 +15,8 @@ const AdminLoginPage = () => {
     })
     .required();
 
-  const { dispatch } = React.useContext(AuthContext);
+  const { dispatch: authDispatch } = React.useContext(AuthContext);
+  const { dispatch: gpDispatch } = React.useContext(GlobalContext);
   const navigate = useNavigate();
   const {
     register,
@@ -27,11 +29,36 @@ const AdminLoginPage = () => {
 
   const onSubmit = async (data) => {
     let sdk = new MkdSDK();
-    //TODO
+    const loginResult = await sdk.login(data.email, data.password, "admin");
+    console.log(loginResult);
+    const checkedRole = await sdk.check(loginResult.role, loginResult.token);
+    console.log(checkedRole);
+    if (checkedRole.error === false && checkedRole.message === "OK") {
+      gpDispatch({
+        type: "SNACKBAR",
+        payload: {
+          message: "You are logged in!"
+        }
+      });
+      authDispatch({
+        type: "LOGIN",
+        payload: {
+          isAuthenticated: true,
+          user: data.email,
+          role: "admin",
+          token: loginResult.token
+        }
+      });
+
+      navigate("/admin/dashboard");
+
+
+    }
   };
 
   return (
     <div className="w-full max-w-xs mx-auto">
+
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 mt-8 "
@@ -47,9 +74,8 @@ const AdminLoginPage = () => {
             type="email"
             placeholder="Email"
             {...register("email")}
-            className={`"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-              errors.email?.message ? "border-red-500" : ""
-            }`}
+            className={`"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${errors.email?.message ? "border-red-500" : ""
+              }`}
           />
           <p className="text-red-500 text-xs italic">{errors.email?.message}</p>
         </div>
@@ -65,9 +91,8 @@ const AdminLoginPage = () => {
             type="password"
             placeholder="******************"
             {...register("password")}
-            className={`shadow appearance-none border  rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline ${
-              errors.password?.message ? "border-red-500" : ""
-            }`}
+            className={`shadow appearance-none border  rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline ${errors.password?.message ? "border-red-500" : ""
+              }`}
           />
           <p className="text-red-500 text-xs italic">
             {errors.password?.message}

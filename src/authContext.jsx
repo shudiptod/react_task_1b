@@ -1,7 +1,7 @@
 import React, { useReducer } from "react";
 import MkdSDK from "./utils/MkdSDK";
 
-export const AuthContext = React.createContext();
+export const AuthContext = React.createContext("");
 
 const initialState = {
   isAuthenticated: false,
@@ -13,9 +13,8 @@ const initialState = {
 const reducer = (state, action) => {
   switch (action.type) {
     case "LOGIN":
-      //TODO
       return {
-        ...state,
+        ...action.payload,
       };
     case "LOGOUT":
       localStorage.clear();
@@ -45,8 +44,18 @@ const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   React.useEffect(() => {
-    //TODO
-  }, []);
+    if (state.isAuthenticated) {
+      sdk.check(state.role, state.token).then(tokenExpirationResult => {
+        if (tokenExpirationResult.error === false && tokenExpirationResult.message === "OK") {
+          return;
+        }
+        else {
+          tokenExpireError(dispatch, "TOKEN_EXPIRED");
+        }
+      })
+    }
+
+  }, [state.isAuthenticated]);
 
   return (
     <AuthContext.Provider
