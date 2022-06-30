@@ -1,13 +1,15 @@
 import React from 'react';
+import { useNavigate } from 'react-router';
 import { AuthContext } from '../authContext';
 import logoutIcon from '../media/icon_logout.png';
 const Navbar = () => {
     const { dispatch } = React.useContext(AuthContext);
-
+    const navigate = useNavigate();
     const logOut = () => {
         dispatch({
             type: "LOGOUT"
-        })
+        });
+        navigate("/admin/login");
     };
     return (
         <div className="w-3/4 flex justify-between items-center mb-16 mt-5">
