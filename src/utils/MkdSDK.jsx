@@ -26,14 +26,16 @@ export default function MkdSDK() {
       ),
       "redirect": "follow"
     });
-    return loginResponse.json();
+    const response = await loginResponse.json();
+    window.localStorage.setItem("token", response.token);
+    return response;
 
   };
 
   this.getHeader = function () {
     return {
       Authorization: "Bearer " + localStorage.getItem("token"),
-      "x-project": base64Encode,
+      "X-project": base64Encode,
     };
   };
 
